@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=GDAQrec data recorder
+Comment=Record data from the DAQ on musclepull
+Exec=GDAQrec
+Icon=GDAQrec
+Terminal=false
+Type=Application
+Categories=Qt;Application;Science;Education;Biology;
+StartupNotify=false
