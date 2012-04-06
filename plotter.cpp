@@ -63,7 +63,8 @@ Plotter::Plotter(QWidget *parent) :
 #else
     connect(&daqReader, SIGNAL(finished()), this, SLOT(stoppedRecording()));
 #endif
-    saved=true;
+    startTime = QDateTime::currentDateTimeUtc();
+    saved = true;
 
     clearPlot();
 }
@@ -221,7 +222,7 @@ void Plotter::open()
    if (offerToSave()) {
       QString newFilename = QFileDialog::getOpenFileName(
             this, tr("Open data"), QString(), 
-            tr("Data files (*.csv)"));
+            tr("Data files (*.csv);;All Files (*)"));
 
       if (!newFilename.isEmpty()) {
          QFile file(newFilename);
@@ -262,8 +263,11 @@ void Plotter::open()
 void Plotter::save() 
 {
    if (filename.isEmpty()) {
-      filename = QFileDialog::getSaveFileName(this, tr("Save data"), QString(), 
-            tr("Data files (*.csv)"));
+      QString suggestedFilename = (startTime.toString(Qt::ISODate) + ".csv");
+      suggestedFilename.remove(':'); 
+      filename = QFileDialog::getSaveFileName(this, tr("Save data"), 
+          suggestedFilename, 
+          tr("Data files (*.csv);;All Files (*)"));
    }
    
    if (!filename.isEmpty()) {
@@ -345,7 +349,10 @@ void Plotter::newData()
    int numScansRead = daqReader.appendData(&curveMap); 
 
    if (numScansRead > 0) {
-      saved = false;
+      if (saved) {
+          startTime = QDateTime::currentDateTimeUtc();
+          saved = false;
+      }
 
       // expand the top level zoom, if needed.
       if (zoomStack[0].maxX < curveMap[0].last().x()) {
@@ -665,7 +672,7 @@ void Plotter::drawCurves(QPainter *painter)
             // (and then to the next pixel) (This speeds up drawing 
             // dramatically)
             int prevX = rect.left()-2;
-            int minY, maxY;
+            int minY = 0, maxY = 0; // reinitialized below
             bool firstPoint = true;
 
             for (; j < data.count() 

@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QTimer>
 #include <QMutex>
+#include <QDateTime>
 #include "DAQReader.h"
 
 class QToolButton;
@@ -73,6 +74,7 @@ private:
     QRect rubberBandRect;
     QPixmap pixmap;
     bool saved;
+    QDateTime startTime;
     DAQReader daqReader;
     QString filename;
 
