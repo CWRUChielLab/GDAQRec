@@ -1,0 +1,6 @@
+Makefile
+*.o
+qrc_*
+ui_*
+moc_*
+GDAQrec
