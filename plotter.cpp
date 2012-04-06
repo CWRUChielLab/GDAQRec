@@ -274,11 +274,11 @@ void Plotter::save()
          // the -1 is to ignore partial scans on comedi
          
          for (int scan = 0; scan < maxScans; ++scan) {
-            fprintf(file, "%g", curveMap[0][scan].x());
+            fprintf(file, "%.6f", curveMap[0][scan].x());
 
             for (CurveMap::iterator chanIter = curveMap.begin(); 
                   chanIter != curveMap.end(); ++chanIter) {
-               fprintf(file, ",%g", (*chanIter)[scan].y());
+               fprintf(file, ",%.6f", (*chanIter)[scan].y());
             }
 
             fprintf(file, "\n");
