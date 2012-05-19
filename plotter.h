@@ -77,6 +77,7 @@ private:
     QDateTime startTime;
     DAQReader daqReader;
     QString filename;
+    double traceOffset;
 
 #ifdef Q_WS_MAC
     bool recording;

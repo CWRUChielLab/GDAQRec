@@ -65,6 +65,7 @@ Plotter::Plotter(QWidget *parent) :
 #endif
     startTime = QDateTime::currentDateTimeUtc();
     saved = true;
+    traceOffset = 0.0;
 
     clearPlot();
 }
@@ -528,6 +529,14 @@ void Plotter::keyPressEvent(QKeyEvent *event)
         zoomStack[curZoom].scroll(0, +1);
         refreshPixmap();
         break;
+    case Qt::Key_S:
+        if (traceOffset == 0.0) {
+            traceOffset = 0.1;
+        } else {
+            traceOffset = 0.0;
+        }
+        refreshPixmap();
+        break;
     default:
         QWidget::keyPressEvent(event);
     }
@@ -639,6 +648,7 @@ void Plotter::drawCurves(QPainter *painter)
     painter->setClipRect(rect.adjusted(+1, +1, -1, -1));
 
     QMapIterator<int, QVector<QPointF> > i(curveMap);
+    double offset = 0.0;
     while (i.hasNext()) {
         i.next();
 
@@ -678,7 +688,7 @@ void Plotter::drawCurves(QPainter *painter)
             for (; j < data.count() 
                   && (j == 0 || data[j-1].x() < settings.maxX); ++j) {
                double dx = data[j].x() - settings.minX;
-               double dy = data[j].y() - settings.minY;
+               double dy = data[j].y() - settings.minY + offset;
                double x = rect.left() + (dx * (rect.width() - 1)
                                             / settings.spanX());
                double y = rect.bottom() - (dy * (rect.height() - 1)
@@ -707,6 +717,7 @@ void Plotter::drawCurves(QPainter *painter)
             painter->drawPolyline(polyline);
         
         }
+        offset -= traceOffset;
     }
 }
 
