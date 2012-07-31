@@ -5,11 +5,15 @@
 
 using namespace std;
 
+const char* sharedTimestampFormat = "%13.6f";
+const int sharedTimestampSize = 14;
+
 Plotter::Plotter(QWidget *parent) :
 #ifdef Q_WS_MAC
     recording(false),
 #endif
-    QWidget(parent)
+    QWidget(parent),
+    sharedTimestamp(QDir::homePath() + QString("/.GDAQRec_timestamp"))
 {
     daqSettings.restore();
     daqReader.updateDAQSettings(daqSettings);
@@ -141,6 +145,16 @@ void Plotter::startedRecording()
 {
    recordButton->setIcon(QIcon(":/images/stop.png"));
    recordButton->setEnabled(true);
+   sharedTimestamp.open(QIODevice::ReadWrite);
+
+   // Create a file containing the current recording time
+   char zeroTime[sharedTimestampSize + 1];
+   qsnprintf(zeroTime, sharedTimestampSize + 1, 
+           sharedTimestampFormat, 0.0);
+   sharedTimestamp.write(zeroTime, sharedTimestampSize);
+   sharedTimestamp.flush();
+   sharedTimestampMemMap = 
+       sharedTimestamp.map(0, sharedTimestampSize);
 }
 
 void Plotter::stoppedRecording()
@@ -148,6 +162,11 @@ void Plotter::stoppedRecording()
    recordButton->setIcon(QIcon(":/images/record.png"));
    recordButton->setEnabled(true);
    settingsButton->setEnabled(true);
+
+   // delete the shared recording timestamp
+   sharedTimestamp.unmap(sharedTimestampMemMap);
+   sharedTimestamp.close();
+   sharedTimestamp.remove();
 }
 
 void Plotter::toggleRecording()
@@ -380,6 +399,10 @@ void Plotter::newData()
          zoomStack[curZoom].includesRightEdge = false;
       }
 
+      // update the shared timestamp
+      qsnprintf((char*)sharedTimestampMemMap, sharedTimestampSize, 
+              sharedTimestampFormat, curveMap[0].last().x());
+              
       refreshPixmap();
    }
 }

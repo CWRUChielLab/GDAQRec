@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QMutex>
 #include <QDateTime>
+#include <QFile>
 #include "DAQReader.h"
 
 class QToolButton;
@@ -78,6 +79,8 @@ private:
     DAQReader daqReader;
     QString filename;
     double traceOffset;
+    QFile sharedTimestamp;
+    uchar* sharedTimestampMemMap;
 
 #ifdef Q_WS_MAC
     bool recording;
