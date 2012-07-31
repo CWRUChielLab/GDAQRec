@@ -1,4 +1,4 @@
-#ifndef DAQREADER_H 
+#ifndef DAQREADER_H
 #define DAQREADER_H
 
 #include <QThread>
@@ -15,7 +15,7 @@ class DAQReader : public QThread
 public:
    DAQReader();
    int appendData(QMap<int, QVector<QPointF> >* curveMap);
-   void stop();    
+   void stop();
 
 signals:
    void newData();
@@ -31,9 +31,9 @@ protected:
    bool DAQCheckHandler(const char* cmd, int error);
 
    enum { maxChannels = 8, maxScansPerSecond = 35000 };
-    
+
    volatile bool shouldStop;
-    
+
    int numChannels;
    double dt;
    double Vmins[maxChannels], Vmaxes[maxChannels];

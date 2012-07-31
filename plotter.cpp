@@ -9,11 +9,11 @@ Plotter::Plotter(QWidget *parent) :
 #ifdef Q_WS_MAC
     recording(false),
 #endif
-    QWidget(parent) 
+    QWidget(parent)
 {
     daqSettings.restore();
     daqReader.updateDAQSettings(daqSettings);
-    
+
     setAutoFillBackground(true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setFocusPolicy(Qt::StrongFocus);
@@ -23,22 +23,22 @@ Plotter::Plotter(QWidget *parent) :
     newButton->setText("New");
     newButton->adjustSize();
     connect(newButton, SIGNAL(clicked()), this, SLOT(newDocument()));
-    
+
     openButton = new QToolButton(this);
     openButton->setText("Open");
     openButton->adjustSize();
     connect(openButton, SIGNAL(clicked()), this, SLOT(open()));
-    
+
     saveButton = new QToolButton(this);
     saveButton->setText("Save");
     saveButton->adjustSize();
     connect(saveButton, SIGNAL(clicked()), this, SLOT(save()));
-    
+
     settingsButton = new QToolButton(this);
     settingsButton->setText("Settings");
     settingsButton->adjustSize();
     connect(settingsButton, SIGNAL(clicked()), this, SLOT(settings()));
-    
+
     recordButton = new QToolButton(this);
     recordButton->setIcon(QIcon(":/images/record.png"));
     recordButton->adjustSize();
@@ -55,7 +55,7 @@ Plotter::Plotter(QWidget *parent) :
     connect(zoomOutButton, SIGNAL(clicked()), this, SLOT(zoomOut()));
 
     connect(&daqReader, SIGNAL(newData()), this, SLOT(newData()));
-    connect(&daqReader, SIGNAL(daqError(const QString&)), this, 
+    connect(&daqReader, SIGNAL(daqError(const QString&)), this,
           SLOT(daqError(const QString&)));
     connect(&daqReader, SIGNAL(startedRecording()), this, SLOT(startedRecording()));
 #ifdef Q_WS_MAC
@@ -73,7 +73,7 @@ Plotter::Plotter(QWidget *parent) :
 void Plotter::clearPlot()
 {
     zoomStack.clear();
-    
+
     PlotSettings settings;
     settings.minY = -10;
     settings.maxY = 10;
@@ -83,7 +83,7 @@ void Plotter::clearPlot()
     curZoom = 1;
 
     // make the top level zoom as wide as the data
-    if (!curveMap[0].isEmpty() 
+    if (!curveMap[0].isEmpty()
           && zoomStack[0].maxX < curveMap[0].last().x()) {
        zoomStack[0].maxX = curveMap[0].last().x();
     }
@@ -103,14 +103,14 @@ void Plotter::zoomOut()
         refreshPixmap();
 
         // if this view was sliding right as the trace grew, keep it on the right
-        // side of the trace.  
+        // side of the trace.
         if (zoomStack[curZoom].includesRightEdge) {
-           double newMaxX = curveMap[0].empty() 
-                  ? zoomStack[curZoom].maxX : curveMap[0].last().x(); 
+           double newMaxX = curveMap[0].empty()
+                  ? zoomStack[curZoom].maxX : curveMap[0].last().x();
            double dx = newMaxX - zoomStack[curZoom].maxX;
-           zoomStack[curZoom].minX += dx; 
+           zoomStack[curZoom].minX += dx;
            zoomStack[curZoom].maxX += dx;
-           zoomStack[curZoom].includesRightEdge = true; 
+           zoomStack[curZoom].includesRightEdge = true;
         }
     }
 }
@@ -125,14 +125,14 @@ void Plotter::zoomIn()
         refreshPixmap();
 
         // if this view was sliding right as the trace grew, keep it on the right
-        // side of the trace.  
+        // side of the trace.
         if (zoomStack[curZoom].includesRightEdge) {
-           double newMaxX = curveMap[0].empty() 
-                  ? zoomStack[curZoom].maxX : curveMap[0].last().x(); 
+           double newMaxX = curveMap[0].empty()
+                  ? zoomStack[curZoom].maxX : curveMap[0].last().x();
            double dx = newMaxX - zoomStack[curZoom].maxX;
-           zoomStack[curZoom].minX += dx; 
+           zoomStack[curZoom].minX += dx;
            zoomStack[curZoom].maxX += dx;
-           zoomStack[curZoom].includesRightEdge = true; 
+           zoomStack[curZoom].includesRightEdge = true;
         }
      }
 }
@@ -173,10 +173,10 @@ void Plotter::toggleRecording()
   }
 }
 
-bool Plotter::offerToSave() 
+bool Plotter::offerToSave()
 {
    if (!saved) {
-      int result = QMessageBox::warning(this, tr("GDAQrec"), 
+      int result = QMessageBox::warning(this, tr("GDAQrec"),
             tr("There are unsaved data.\nWould you like to save them?"),
             QMessageBox::Save | QMessageBox::Default,
             QMessageBox::Discard,
@@ -208,28 +208,28 @@ bool Plotter::offerToSave()
    }
  }
 
-void Plotter::newDocument() 
+void Plotter::newDocument()
 {
    if (offerToSave()) {
       saved = true;
       filename.clear();
-      curveMap.clear();   
+      curveMap.clear();
       clearPlot();
    }
 }
 
-void Plotter::open() 
+void Plotter::open()
 {
    if (offerToSave()) {
       QString newFilename = QFileDialog::getOpenFileName(
-            this, tr("Open data"), QString(), 
+            this, tr("Open data"), QString(),
             tr("Data files (*.csv);;All Files (*)"));
 
       if (!newFilename.isEmpty()) {
          QFile file(newFilename);
 
          if (!file.open(QIODevice::ReadOnly)) {
-             QMessageBox::critical(this, tr("GDAQrec"), 
+             QMessageBox::critical(this, tr("GDAQrec"),
                 tr("Could not open file ") + newFilename,
                 QMessageBox::Ok | QMessageBox::Default
              );
@@ -252,7 +252,7 @@ void Plotter::open()
                   for (int i=1; i < coords.size(); ++i) {
                      curveMap[i-1].append(QPointF(time, coords[i].toDouble()));
                   }
-               }  
+               }
              }
 
              clearPlot();
@@ -261,27 +261,27 @@ void Plotter::open()
    }
 }
 
-void Plotter::save() 
+void Plotter::save()
 {
    if (filename.isEmpty()) {
       QString suggestedFilename = (startTime.toString(Qt::ISODate) + ".csv");
-      suggestedFilename.remove(':'); 
-      filename = QFileDialog::getSaveFileName(this, tr("Save data"), 
-          suggestedFilename, 
+      suggestedFilename.remove(':');
+      filename = QFileDialog::getSaveFileName(this, tr("Save data"),
+          suggestedFilename,
           tr("Data files (*.csv);;All Files (*)"));
    }
-   
+
    if (!filename.isEmpty()) {
       FILE* file = fopen(filename.toAscii(), "w");
 
       if (file != NULL) {
-         int maxScans = curveMap[0].count()-1; 
+         int maxScans = curveMap[0].count()-1;
          // the -1 is to ignore partial scans on comedi
-         
+
          for (int scan = 0; scan < maxScans; ++scan) {
             fprintf(file, "%.6f", curveMap[0][scan].x());
 
-            for (CurveMap::iterator chanIter = curveMap.begin(); 
+            for (CurveMap::iterator chanIter = curveMap.begin();
                   chanIter != curveMap.end(); ++chanIter) {
                fprintf(file, ",%.6f", (*chanIter)[scan].y());
             }
@@ -294,8 +294,8 @@ void Plotter::save()
       }
       else {
          filename = QString();
-      
-         int result = QMessageBox::critical(this, tr("GDAQrec"), 
+
+         int result = QMessageBox::critical(this, tr("GDAQrec"),
             tr("I was unable to create the file \"")
              + filename + tr("\"\n") +
             tr("Would you like to try again with a new file name?"),
@@ -312,7 +312,7 @@ void Plotter::save()
 void Plotter::settings()
 {
    DAQSettingsDialog dialog(daqSettings, this);
-   
+
    if (dialog.exec()) {
       daqSettings = dialog.settings;
       daqSettings.save();
@@ -344,10 +344,10 @@ void Plotter::newData()
    if (updateTimer.shouldSkip())
       return;
 
-   double oldMaxX = curveMap[0].empty() 
-      ? zoomStack[curZoom].maxX : curveMap[0].last().x(); 
+   double oldMaxX = curveMap[0].empty()
+      ? zoomStack[curZoom].maxX : curveMap[0].last().x();
 
-   int numScansRead = daqReader.appendData(&curveMap); 
+   int numScansRead = daqReader.appendData(&curveMap);
 
    if (numScansRead > 0) {
       if (saved) {
@@ -361,32 +361,32 @@ void Plotter::newData()
       }
 
 
-      // scroll right if this causes the plot to go from on the page to off of 
+      // scroll right if this causes the plot to go from on the page to off of
       // the page
-      double newMaxX = curveMap[0].empty() 
-         ? zoomStack[curZoom].maxX : curveMap[0].last().x(); 
-      if (zoomStack[curZoom].minX <= oldMaxX 
+      double newMaxX = curveMap[0].empty()
+         ? zoomStack[curZoom].maxX : curveMap[0].last().x();
+      if (zoomStack[curZoom].minX <= oldMaxX
           && oldMaxX <= zoomStack[curZoom].maxX
           && newMaxX > zoomStack[curZoom].maxX
-          ) 
+          )
       {
          double dx = newMaxX - zoomStack[curZoom].maxX;
-         zoomStack[curZoom].minX += dx; 
+         zoomStack[curZoom].minX += dx;
          zoomStack[curZoom].maxX += dx;
-         zoomStack[curZoom].includesRightEdge = true; 
+         zoomStack[curZoom].includesRightEdge = true;
       }
       else
       {
-         zoomStack[curZoom].includesRightEdge = false; 
+         zoomStack[curZoom].includesRightEdge = false;
       }
 
-      refreshPixmap();  
-   }  
+      refreshPixmap();
+   }
 }
 
-void Plotter::daqError(const QString& errorMessage) 
+void Plotter::daqError(const QString& errorMessage)
 {
-   QMessageBox::critical(this, tr("GDAQrec"), 
+   QMessageBox::critical(this, tr("GDAQrec"),
       tr("The following DAQ error occured:\n") + errorMessage,
       QMessageBox::Ok | QMessageBox::Default
       );
@@ -605,7 +605,7 @@ void Plotter::drawGrid(QPainter *painter)
           (daqSettings.fgColor.red() + daqSettings.bgColor.red())/2,
           (daqSettings.fgColor.green() + daqSettings.bgColor.green())/2,
           (daqSettings.fgColor.blue() + daqSettings.bgColor.blue())/2
-          ); 
+          );
     QPen light = daqSettings.fgColor;
 
     for (int i = 0; i <= settings.numXTicks; ++i) {
@@ -659,12 +659,12 @@ void Plotter::drawCurves(QPainter *painter)
             QVector<QPointF> points;
 
             int j;
-            
+
             // skip points off the left edge of the graph
             // (use a binary search, since there may be a lot of data)
             int lowbound = 0;
             int highbound = data.count()-1;
-            
+
             while (lowbound + 1 < highbound) {
               int mid = (lowbound + highbound)/2;
 
@@ -677,15 +677,15 @@ void Plotter::drawCurves(QPainter *painter)
             }
             j = max(0, lowbound-1);
 
-            // since there can be many points per pixel, just draw a line 
-            // from the minumum in that pixel to the maximum in that pixel 
-            // (and then to the next pixel) (This speeds up drawing 
+            // since there can be many points per pixel, just draw a line
+            // from the minumum in that pixel to the maximum in that pixel
+            // (and then to the next pixel) (This speeds up drawing
             // dramatically)
             int prevX = rect.left()-2;
             int minY = 0, maxY = 0; // reinitialized below
             bool firstPoint = true;
 
-            for (; j < data.count() 
+            for (; j < data.count()
                   && (j == 0 || data[j-1].x() < settings.maxX); ++j) {
                double dx = data[j].x() - settings.minX;
                double dy = data[j].y() - settings.minY + offset;
@@ -698,10 +698,10 @@ void Plotter::drawCurves(QPainter *painter)
                   firstPoint = false;
                }
 
-               if (int(x) != prevX) { 
+               if (int(x) != prevX) {
                   points.append(QPointF(x,minY));
                   points.append(QPointF(x,maxY));
-                  
+
                   prevX = int(x);
                   minY = maxY = int(y);
                }
@@ -712,10 +712,10 @@ void Plotter::drawCurves(QPainter *painter)
             }
 
             QPolygonF polyline(points);
-               
+
             painter->setPen(daqSettings.color[uint(id) % 8]);
             painter->drawPolyline(polyline);
-        
+
         }
         offset -= traceOffset;
     }
