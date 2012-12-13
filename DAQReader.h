@@ -10,36 +10,36 @@
 
 class DAQReader : public QThread
 {
-   Q_OBJECT
+    Q_OBJECT
 
-public:
-   DAQReader();
-   int appendData(QMap<int, QVector<QPointF> >* curveMap);
-   void stop();
+    public:
+        DAQReader();
+        int appendData(QMap<int, QVector<QPointF> >* curveMap);
+        void stop();
 
-signals:
-   void newData();
-   void daqError(const QString& errorMessage);
-   void startedRecording();
-   void stoppedRecording();
+    signals:
+        void newData();
+        void daqError(const QString& errorMessage);
+        void startedRecording();
+        void stoppedRecording();
 
-public:
-   void run();
-   void updateDAQSettings(const DAQSettings& settings);
+    public:
+        void run();
+        void updateDAQSettings(const DAQSettings& settings);
 
-protected:
-   bool DAQCheckHandler(const char* cmd, int error);
+    protected:
+        bool DAQCheckHandler(const char* cmd, int error);
 
-   enum { maxChannels = 8, maxScansPerSecond = 35000 };
+        enum { maxChannels = 8, maxScansPerSecond = 35000 };
 
-   volatile bool shouldStop;
+        volatile bool shouldStop;
 
-   int numChannels;
-   double dt;
-   double Vmins[maxChannels], Vmaxes[maxChannels];
+        int numChannels;
+        double dt;
+        double Vmins[maxChannels], Vmaxes[maxChannels];
 
-   QVector<qreal> newDataBuffer[maxChannels];
-   QMutex mutex;
+        QVector<qreal> newDataBuffer[maxChannels];
+        QMutex mutex;
 };
 
 #endif
