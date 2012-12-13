@@ -6,6 +6,7 @@
 #if defined(USE_NIDAQMXBASE)
    #include <NIDAQmxBase.h>
 #elif defined(USE_COMEDI)
+   #include <unistd.h>
    #include <comedilib.h>
 #else
    #error No DAQ library was defined!
