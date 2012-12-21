@@ -560,6 +560,14 @@ void Plotter::toggleRecording()
                 }
                 refreshPixmap();
                 break;
+            case Qt::Key_A:
+                traceOffset -= 0.01;
+                refreshPixmap();
+                break;
+            case Qt::Key_D:
+                traceOffset += 0.01;
+                refreshPixmap();
+                break;
             default:
                 QWidget::keyPressEvent(event);
         }
